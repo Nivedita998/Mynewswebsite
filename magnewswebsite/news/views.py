@@ -8,12 +8,33 @@ from cat.models import  Cat
 
 # Create your views here.
 def news_detail(request,word):
+    
     site=Main.objects.get(pk=2)
-    news=News.objects.filter(name=word)
-    # cat=Cat.objects.all()
-    # in dictionary---- 'cat' : cat
+    news=News.objects.all().order_by('-pk')
+    cat=Cat.objects.all()
+    subcat=SubCat.objects.all()
+    lastnews=News.objects.all().order_by('-pk')[:3]
+
+    shownews=News.objects.filter(name=word)
+    popnews =News.objects.all().order_by('-show')
+    popnews2 =News.objects.all().order_by('-show')[:3]
+
+    tagname = News.objects.get(name=word).tag
+    tag=tagname.split(',')
+
+    try:
+        mynews=News.objects.get(name=word)
+        mynews.show=mynews.show + 1
+        mynews.save()
+    except:
+        print("can't Add  Show")
+
+       
    
-    return render(request,'front/news_detail.html',{'site':site,'news':news,})
+
+
+
+    return render(request,'front/news_detail.html',{'site':site, 'news':news, 'cat' : cat,'subcat': subcat,'lastnews': lastnews,'shownews' : shownews,'popnews':popnews,'popnews2':popnews2,'tag':tag})
 
 def news_list(request):
     #login check start
@@ -61,6 +82,7 @@ def news_add(request):
         newstxtshort = request.POST.get('newstxtshort')
         newstxt = request.POST.get('newstxt')
         newsid = request.POST.get('newscat')
+        tag=request.Post.get('tag')
 
         
         
@@ -82,7 +104,7 @@ def news_add(request):
 
 
 
-                    b=News(name=newstitle,short_txt= newstxtshort ,body_txt =newstxt , date=today,picname=filename,picurl=url,writer='-',catname=newsname,catid=newsid,show=0 ,time=time,ocatid=ocatid)
+                    b=News(name=newstitle,short_txt= newstxtshort ,body_txt =newstxt , date=today,picname=filename,picurl=url,writer='-',catname=newsname,catid=newsid,show=0 ,time=time,ocatid=ocatid,tag=tag)
                     b.save()
 
                     count=len(News.objects.filter(ocatid=ocatid))
@@ -171,6 +193,7 @@ def news_edit(request , pk):
         newstxtshort = request.POST.get('newstxtshort')
         newstxt = request.POST.get('newstxt')
         newsid = request.POST.get('newscat')
+        tag=request.POST.get('tag')
 
         
         
@@ -206,6 +229,7 @@ def news_edit(request , pk):
                     b.picurl = url
                     b.catname = newsname
                     b.catid = newsid
+                    b.tag=tag
 
 
                     b.save()
@@ -241,6 +265,7 @@ def news_edit(request , pk):
             b.body_txt = newstxt
             b.catname = newsname
             b.catid = newsid
+            b.tag=tag
 
 
             b.save()
